@@ -9,7 +9,6 @@ class CategoryRequest extends BaseRequest {
   //        request.parent_id = 0
   //        request.is_tree = 1
   //        request.is_children = 0
-//  String cmd;
   int category_version;
   int parent_id;
   int is_tree;
@@ -17,6 +16,7 @@ class CategoryRequest extends BaseRequest {
 
   CategoryRequest({this.category_version, this.parent_id, this.is_tree, this.is_children}) : super(Api.CMD_GET_CATEGORY);
 
+  @override
   Map<String, dynamic> toJson() {
     return _$CategoryRequestToJson(this);
   }

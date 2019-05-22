@@ -1,67 +1,110 @@
 
-class ProductsBean {
+import 'base.dart';
+
+class Product extends BaseResponseData {
+
   /**
-   * page : 1
-   * per_page : 3
-   * total : 12
-   * total_pages : 4
-   * data : [{"id":1,"email":"george.bluth@reqres.in","first_name":"George","last_name":"Bluth","avatar":"https://s3.amazonaws.com/uifaces/faces/twitter/calebogden/128.jpg"},{"id":2,"email":"janet.weaver@reqres.in","first_name":"Janet","last_name":"Weaver","avatar":"https://s3.amazonaws.com/uifaces/faces/twitter/josephstein/128.jpg"},{"id":3,"email":"emma.wong@reqres.in","first_name":"Emma","last_name":"Wong","avatar":"https://s3.amazonaws.com/uifaces/faces/twitter/olegpogodaev/128.jpg"}]
+   * current_page : 1
+   * page_size : 10
+   * total_count : 23
+   * total_page : 3
+   * items : [{"click":0,"description":"","goods_id":1,"goods_name":"","goods_unit":"","installment_num":12,"installment_price":1597,"introduction":"","jump_url":"","market_price":17900,"picture":"","price":15900,"promotion_price":0,"sales":198,"shop_id":1,"stock":0}]
    */
 
-  int page;
-  int per_page;
-  int total;
-  int total_pages;
-  List<ProductBean> data;
+  int current_page;
+  int page_size;
+  int total_count;
+  int total_page;
+  List<ProductItem> items;
 
-  static ProductsBean fromMap(Map<String, dynamic> map) {
-    ProductsBean product = new ProductsBean();
-    product.page = map['page'];
-    product.per_page = map['per_page'];
-    product.total = map['total'];
-    product.total_pages = map['total_pages'];
-    product.data = ProductBean.fromMapList(map['data']);
+  static Product fromMap(Map<String, dynamic> map) {
+    Product product = new Product();
+    product.current_page = map['current_page'];
+    product.page_size = map['page_size'];
+    product.total_count = map['total_count'];
+    product.total_page = map['total_page'];
+    product.items = ProductItem.fromMapList(map['items']);
     return product;
   }
 
-  static List<ProductsBean> fromMapList(dynamic mapList) {
+  static List<Product> fromMapList(dynamic mapList) {
     if (mapList == null) return [];
-    List<ProductsBean> list = new List(mapList.length);
+    List<Product> list = new List(mapList.length);
     for (int i = 0; i < mapList.length; i++) {
       list[i] = fromMap(mapList[i]);
     }
     return list;
   }
-}
 
-class ProductBean {
-  /**
-   * email : "george.bluth@reqres.in"
-   * first_name : "George"
-   * last_name : "Bluth"
-   * avatar : "https://s3.amazonaws.com/uifaces/faces/twitter/calebogden/128.jpg"
-   * id : 1
-   */
-
-  String email;
-  String first_name;
-  String last_name;
-  String avatar;
-  int id;
-
-  static ProductBean fromMap(Map<String, dynamic> map) {
-    ProductBean dataListBean = new ProductBean();
-    dataListBean.email = map['email'];
-    dataListBean.first_name = map['first_name'];
-    dataListBean.last_name = map['last_name'];
-    dataListBean.avatar = map['avatar'];
-    dataListBean.id = map['id'];
-    return dataListBean;
+  @override
+  createSelf(Map<String, dynamic> json) {
+    return fromMap(json);
   }
 
-  static List<ProductBean> fromMapList(dynamic mapList) {
+}
+
+class ProductItem {
+
+  /**
+   * description : ""
+   * goods_name : ""
+   * goods_unit : ""
+   * introduction : ""
+   * jump_url : ""
+   * picture : ""
+   * click : 0
+   * goods_id : 1
+   * installment_num : 12
+   * installment_price : 1597
+   * market_price : 17900
+   * price : 15900
+   * promotion_price : 0
+   * sales : 198
+   * shop_id : 1
+   * stock : 0
+   */
+
+  String description;
+  String goods_name;
+  String goods_unit;
+  String introduction;
+  String jump_url;
+  String picture;
+  int click;
+  int goods_id;
+  int installment_num;
+  int installment_price;
+  int market_price;
+  int price;
+  int promotion_price;
+  int sales;
+  int shop_id;
+  int stock;
+
+  static ProductItem fromMap(Map<String, dynamic> map) {
+    ProductItem itemsListBean = new ProductItem();
+    itemsListBean.description = map['description'];
+    itemsListBean.goods_name = map['goods_name'];
+    itemsListBean.goods_unit = map['goods_unit'];
+    itemsListBean.introduction = map['introduction'];
+    itemsListBean.jump_url = map['jump_url'];
+    itemsListBean.picture = map['picture'];
+    itemsListBean.click = map['click'];
+    itemsListBean.goods_id = map['goods_id'];
+    itemsListBean.installment_num = map['installment_num'];
+    itemsListBean.installment_price = map['installment_price'];
+    itemsListBean.market_price = map['market_price'];
+    itemsListBean.price = map['price'];
+    itemsListBean.promotion_price = map['promotion_price'];
+    itemsListBean.sales = map['sales'];
+    itemsListBean.shop_id = map['shop_id'];
+    itemsListBean.stock = map['stock'];
+    return itemsListBean;
+  }
+
+  static List<ProductItem> fromMapList(dynamic mapList) {
     if (mapList == null) return [];
-    List<ProductBean> list = new List(mapList.length);
+    List<ProductItem> list = new List(mapList.length);
     for (int i = 0; i < mapList.length; i++) {
       list[i] = fromMap(mapList[i]);
     }

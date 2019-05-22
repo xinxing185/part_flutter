@@ -6,13 +6,15 @@ part of 'response.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ResponseBody _$ResponseBodyFromJson(Map<String, dynamic> json) {
-  return ResponseBody(
+ResponseBody1<T> _$ResponseBody1FromJson<T extends BaseResponseData>(
+    Map<String, dynamic> json) {
+  return ResponseBody1<T>(
       json['code'] as String, json['msg'] as String, json['crypt'] as String,
       data: json['data'] as Map<String, dynamic>);
 }
 
-Map<String, dynamic> _$ResponseBodyToJson(ResponseBody instance) =>
+Map<String, dynamic> _$ResponseBody1ToJson<T extends BaseResponseData>(
+        ResponseBody1<T> instance) =>
     <String, dynamic>{
       'code': instance.code,
       'msg': instance.msg,
@@ -20,13 +22,15 @@ Map<String, dynamic> _$ResponseBodyToJson(ResponseBody instance) =>
       'data': instance.data
     };
 
-ResponseBody2 _$ResponseBody2FromJson(Map<String, dynamic> json) {
-  return ResponseBody2(
+ResponseBody2<T> _$ResponseBody2FromJson<T extends BaseResponseData>(
+    Map<String, dynamic> json) {
+  return ResponseBody2<T>(
       json['code'] as String, json['msg'] as String, json['crypt'] as String,
       data: json['data'] as List);
 }
 
-Map<String, dynamic> _$ResponseBody2ToJson(ResponseBody2 instance) =>
+Map<String, dynamic> _$ResponseBody2ToJson<T extends BaseResponseData>(
+        ResponseBody2<T> instance) =>
     <String, dynamic>{
       'code': instance.code,
       'msg': instance.msg,

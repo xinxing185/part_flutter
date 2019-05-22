@@ -1,46 +1,47 @@
+import 'dart:convert';
+
 import 'package:demoflutter/bridge/native_method.dart';
-import 'package:demoflutter/model/product.dart';
+import 'package:demoflutter/model/category.dart';
+import 'package:demoflutter/model/user.dart';
 import 'package:demoflutter/model/response.dart';
 import 'package:demoflutter/net/api.dart';
 import 'package:demoflutter/net/http_util.dart';
 import 'package:demoflutter/request/get_category.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'dart:convert';
 
-class ProductList extends StatefulWidget {
+class UserList extends StatefulWidget {
 
   @override
-  ProductListState createState() => ProductListState();
+  UserListState createState() => UserListState();
 }
 
-class ProductListState extends State<StatefulWidget> {
+class UserListState extends State<StatefulWidget> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  List<ProductBean> products;
+  List<UserBean> users;
 
   @override
   void initState() {
     _fetchData();
-    _fetchPostData();
   }
 
   @override
   Widget build(BuildContext context) {
     var contentView;
-    if (products == null || products.length == 0) {
+    if (users == null || users.length == 0) {
       contentView = Center(
           child: CircularProgressIndicator()
       );
     } else {
       contentView = Container(
         child: ListView.builder(
-            itemBuilder: (context, i) => _buildProductItem(context, i),
-            itemCount: products.length,
+            itemBuilder: (context, i) => _buildUserItem(context, i),
+            itemCount: users.length,
           )
       );
 //      contentView = ListView.builder(
-//        itemBuilder: (context, i) => _buildProductItem(context, i),
+//        itemBuilder: (context, i) => _buildUserItem(context, i),
 //        itemCount: products.length,
 //      );
     }
@@ -70,11 +71,11 @@ class ProductListState extends State<StatefulWidget> {
     );
   }
 
-  _buildProductItem(BuildContext context, int i) {
+  _buildUserItem(BuildContext context, int i) {
     var prdImage = Container(
       padding: EdgeInsets.only(left: 10, right: 10),
       child: CircleAvatar(
-        backgroundImage: NetworkImage(products[i].avatar),
+        backgroundImage: NetworkImage(users[i].avatar),
         backgroundColor: Color(0xFF42A5F5),
         radius: 20,
       ),
@@ -85,7 +86,7 @@ class ProductListState extends State<StatefulWidget> {
         radius: 22,
         child: ClipOval(
           child: SizedBox(
-            child: Image.network(products[i].avatar,
+            child: Image.network(users[i].avatar,
                 fit: BoxFit.fill),
           ),
         ),
@@ -96,7 +97,7 @@ class ProductListState extends State<StatefulWidget> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text("${products[i].first_name} ${products[i].last_name}",
+        Text("${users[i].first_name} ${users[i].last_name}",
           style: TextStyle(
             color: Color(0xFF536DFE),
             fontWeight: FontWeight.w500,
@@ -104,7 +105,7 @@ class ProductListState extends State<StatefulWidget> {
           ),),
         Container(
           padding: EdgeInsets.only(top: 5),
-          child: Text("E-mail: ${products[i].email}",
+          child: Text("E-mail: ${users[i].email}",
               style: TextStyle(
                 fontWeight: FontWeight.w300,
               )),
@@ -132,22 +133,12 @@ class ProductListState extends State<StatefulWidget> {
   }
 
   _onHttpSuccess(Response res) {
-    var prds = ProductsBean
+    var prds = UsersBean
         .fromMap(res.data);
     _snakeBarTips("data success ${prds.total}");
     setState(() {
-      products = prds.data;
+      users = prds.data;
     });
-  }
-
-  _onCategorySuccess(Response res) {
-    print(res.data);
-    Map<String, dynamic> map = json.decode(res.data);
-    ResponseBody2 responseBody = ResponseBody2.fromJson(map);
-    List list = responseBody.data;
-    for(int i = 0; i < list.length; i++) {
-
-    }
   }
 
   _fetchData() {
@@ -155,20 +146,6 @@ class ProductListState extends State<StatefulWidget> {
         "https://reqres.in/api/users", {"page": 1, "per_page": 14});
     res.then((onValue) =>
         _onHttpSuccess(onValue),
-    onError: (e) => _onHttpError(e));
-  }
-
-  _fetchPostData() {
-    var cReq = CategoryRequest(
-        category_version: 1,
-        parent_id: 0,
-        is_tree: 1,
-        is_children: 0
-    );
-    Future<Response> res = HttpUtil.post(
-        Api.BASE_URL, cReq.toJson());
-    res.then((onValue) =>
-        _onCategorySuccess(onValue),
     onError: (e) => _onHttpError(e));
   }
 

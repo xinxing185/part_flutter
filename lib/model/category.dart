@@ -4,7 +4,7 @@ import 'base.dart';
 part 'category.g.dart';
 
 @JsonSerializable()
-class Category extends BaseResponseData{
+class Category extends BaseResponseData {
 
   /**
    * category_name : "新品上架"
@@ -28,6 +28,8 @@ class Category extends BaseResponseData{
   int level;
   int pid;
   int sort;
+
+  Category();
 
   factory Category.fromJson(Map<String, dynamic> json) =>
       _$CategoryFromJson(json);

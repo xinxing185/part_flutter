@@ -1,14 +1,9 @@
-import 'package:json_annotation/json_annotation.dart';
-part 'base.g.dart';
 
-@JsonSerializable()
-class BaseRequest {
+abstract class BaseRequest {
   String cmd;
 
   BaseRequest(this.cmd);
 
-  Map<String, dynamic> toJson() {
-    return null;
-  }
+  Map<String, dynamic> toJson();
 
 }

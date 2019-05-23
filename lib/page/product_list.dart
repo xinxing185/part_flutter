@@ -7,7 +7,7 @@ import 'package:demoflutter/model/response.dart';
 import 'package:demoflutter/net/api.dart';
 import 'package:demoflutter/net/http_util.dart';
 import 'package:demoflutter/request/get_category.dart';
-import 'package:demoflutter/request/getproduct.dart';
+import 'package:demoflutter/request/get_product.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 

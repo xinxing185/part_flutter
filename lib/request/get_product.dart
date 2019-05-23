@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'base.dart';
 import 'package:demoflutter/net/api.dart';
-part 'getproduct.g.dart';
+part 'get_product.g.dart';
 
 @JsonSerializable()
 class GetProductRequest extends BaseRequest {

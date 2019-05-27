@@ -1,12 +1,6 @@
-import 'dart:convert';
-
 import 'package:demoflutter/bridge/native_method.dart';
-import 'package:demoflutter/model/category.dart';
 import 'package:demoflutter/model/user.dart';
-import 'package:demoflutter/model/response.dart';
-import 'package:demoflutter/net/api.dart';
 import 'package:demoflutter/net/http_util.dart';
-import 'package:demoflutter/request/get_category.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -28,23 +22,32 @@ class UserListState extends State<StatefulWidget> {
 
   @override
   Widget build(BuildContext context) {
-    var contentView;
-    if (users == null || users.length == 0) {
-      contentView = Center(
-          child: CircularProgressIndicator()
-      );
-    } else {
-      contentView = Container(
-        child: ListView.builder(
-            itemBuilder: (context, i) => _buildUserItem(context, i),
-            itemCount: users.length,
-          )
-      );
-//      contentView = ListView.builder(
-//        itemBuilder: (context, i) => _buildUserItem(context, i),
-//        itemCount: products.length,
-//      );
-    }
+    // user FutureBuilder fro loading initially
+    var contentView = Container(
+        child: FutureBuilder(future: _fetchDataAsync(),
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              if (snapshot.data == null) {
+                return Center(
+                    child: Text("Loading...",
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.lightGreen
+                      ),
+                    )
+                );
+              } else {
+                users = snapshot.data;
+                return Container(
+                    child: ListView.builder(
+                      itemBuilder: (context, i) => _buildUserItem(context, i),
+                      itemCount: users.length,
+                    )
+                );
+              }
+            }
+        )
+    );
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -147,6 +150,18 @@ class UserListState extends State<StatefulWidget> {
     res.then((onValue) =>
         _onHttpSuccess(onValue),
     onError: (e) => _onHttpError(e));
+  }
+
+  Future<List<UserBean>> _fetchDataAsync() async {
+    Response res = await HttpUtil.get(
+        "https://reqres.in/api/users", {"page": 1, "per_page": 14});
+    return _parseUserData(res);
+//    return compute(_parseUserData, res.data.toString());
+  }
+
+  List<UserBean> _parseUserData(Response res) {
+    var prds = UsersBean.fromMap(res.data);
+    return prds.data;
   }
 
   _snakeBarTips(String msg) {

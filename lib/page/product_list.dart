@@ -18,14 +18,21 @@ class ProductList extends StatefulWidget {
 }
 
 class ProductListState extends State<StatefulWidget> {
+  LoadMoreStatus loadMoreStatus = LoadMoreStatus.STABLE;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final ScrollController scrollController = ScrollController();
 
-  List<ProductItem> products;
-  int pageIndex = 0;
+  var products = <ProductItem>[];
+  int pageIndex = 1;
 
   @override
   void initState() {
     _fetchProductData(pageIndex);
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
   }
 
   @override
@@ -36,11 +43,20 @@ class ProductListState extends State<StatefulWidget> {
           child: CircularProgressIndicator()
       );
     } else {
-      contentView = Container(
-        child: ListView.builder(
-            itemBuilder: (context, i) => _buildProductItem(context, i),
-            itemCount: products.length,
-          )
+      contentView = NotificationListener(
+        onNotification: _onNotification,
+        child: GridView.builder(
+          controller: scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            mainAxisSpacing: 3,
+            crossAxisSpacing: 3,
+            crossAxisCount: 2,
+            childAspectRatio: 6 / 7,),
+          itemBuilder: (context, i) => _buildProductItem(context, i),
+          itemCount: products.length,
+          padding: EdgeInsets.fromLTRB(10, 10, 10, 20),
+        ),
       );
     }
     return Scaffold(
@@ -56,67 +72,84 @@ class ProductListState extends State<StatefulWidget> {
         titleSpacing: 0.0,
         centerTitle: true,
         title: Text(
-          "ProductList",
+          "全部商品",
           style: TextStyle(fontSize: 15, fontStyle: FontStyle.normal),
         ),
       ),
-      body:
-      Container(
-          child: Container(
-            child: contentView,
-          )
-      ),
+      body: contentView
     );
+  }
+
+  bool _onNotification(ScrollNotification notification) {
+    if (notification is ScrollUpdateNotification) {
+      if (scrollController.position.maxScrollExtent > scrollController.offset &&
+          scrollController.position.maxScrollExtent - scrollController.offset <=
+              50) {
+        if (loadMoreStatus != null &&
+            loadMoreStatus == LoadMoreStatus.STABLE) {
+          loadMoreStatus = LoadMoreStatus.LOADING;
+          _fetchProductData(pageIndex);
+        }
+      }
+    }
+    return true;
   }
 
   _buildProductItem(BuildContext context, int i) {
     var prdImage = Container(
         padding: EdgeInsets.only(left: 10, right: 10),
         child: Image.network(products[i].picture,
-          width: 60,
-          height: 60,)
+          width: 120,
+          height: 120,)
     );
     var prdInfo = Column(
-      mainAxisSize: MainAxisSize.max,
+      mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text("${products[i].goods_name}",
+          maxLines: 2,
+          semanticsLabel: products[i].introduction,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: Color(0xFF536DFE),
+            color: Color(0xFF757575),
             fontWeight: FontWeight.w500,
             fontSize: 15,
           ),),
         Container(
           padding: EdgeInsets.only(top: 0),
-          child: Text("${products[i].market_price}",
+          child: Text("￥${products[i].market_price / 100}",
               style: TextStyle(
-                fontWeight: FontWeight.w300,
+                color: Color(0xFFE53935),
+                fontWeight: FontWeight.w600,
+                fontSize: 15
               )),
         ),
       ],
     );
     var rowItem = Container(
-      margin: EdgeInsets.only(top: i == 0 ? 10 : 0, bottom: i == products.length -1 ? 10 : 0),
-      child: Column(
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              prdImage,
-              Expanded(
-                child: prdInfo,
+        child: Card(
+          child: InkWell(
+              onTap: () {
+                print("Card tapped.");
+              },
+              child: Container(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    prdImage,
+                    prdInfo,
+                  ],
+                ),
               )
-            ],
           ),
-          if (i < products.length -1) Divider(color: Colors.indigoAccent)
-        ],
-      ),
+        )
     );
     return rowItem;
   }
 
   _onHttpError(DioError error) {
-    _snakeBarTips(error.message);
+    print(error.message);
   }
 
   _onCategorySuccess(Response res) {
@@ -129,13 +162,17 @@ class ProductListState extends State<StatefulWidget> {
   }
 
   _onProductSuccess(Response res) {
+    print(res.data);
     Map<String, dynamic> map = json.decode(res.data);
 
     ResponseBody1<Product> responseBody = ResponseBody1<Product>.fromJson(map);
     Product productList = responseBody.getData(Product());
-    print(productList.total_count);
     setState(() {
-      products = productList.items;
+      loadMoreStatus = LoadMoreStatus.STABLE;
+      if (productList.items != null && productList.items.length > 0) {
+        pageIndex++;
+        products.addAll(productList.items);
+      }
     });
   }
 
@@ -154,6 +191,8 @@ class ProductListState extends State<StatefulWidget> {
   }
 
   _fetchProductData(int pageIndex) {
+    print("product data page=$pageIndex");
+
     var pReq = GetProductRequest(
       category_id: 1,
       page: pageIndex,
@@ -166,13 +205,25 @@ class ProductListState extends State<StatefulWidget> {
     onError: (e) => _onHttpError(e));
   }
 
-  _snakeBarTips(String msg) {
-    var snackBar = SnackBar(
-      content: Text(msg),
-      backgroundColor: Colors.blue,
-      duration: Duration(seconds: 2), // 持续时间
+  Future<List<ProductItem>> _fetchProductDataAsync(int pageIndex) async {
+    var pReq = GetProductRequest(
+      category_id: 1,
+      page: pageIndex,
+      page_size: 10,
     );
-    _scaffoldKey.currentState.showSnackBar(snackBar);
+    Response res = await HttpUtil.post(
+        Api.BASE_URL, pReq.toJson());
+    if (res.statusCode == 200) {
+      Map<String, dynamic> map = json.decode(res.data);
+      ResponseBody1<Product> responseBody = ResponseBody1<Product>.fromJson(
+          map);
+      if (responseBody.code == "0") {
+        Product productList = responseBody.getData(Product());
+        return productList.items;
+      }
+    }
+    return null;
   }
-
 }
+
+enum LoadMoreStatus { LOADING, STABLE }

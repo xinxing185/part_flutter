@@ -13,11 +13,11 @@ class UserList extends StatefulWidget {
 class UserListState extends State<StatefulWidget> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  List<UserBean> users;
+  List<UserBean> users = <UserBean>[];
 
   @override
   void initState() {
-    _fetchData();
+//    _fetchData();
   }
 
   @override
@@ -37,10 +37,16 @@ class UserListState extends State<StatefulWidget> {
                     )
                 );
               } else {
-                users = snapshot.data;
+                users.addAll(snapshot.data);
                 return Container(
                     child: ListView.builder(
-                      itemBuilder: (context, i) => _buildUserItem(context, i),
+                      itemBuilder: (context, i) {
+                        print("${i} in ${users.length}");
+                        if (i == users.length - 1) {
+                          _fetchData();
+                        }
+                        return _buildUserItem(context, i);
+                      },
                       itemCount: users.length,
                     )
                 );
@@ -140,7 +146,8 @@ class UserListState extends State<StatefulWidget> {
         .fromMap(res.data);
     _snakeBarTips("data success ${prds.total}");
     setState(() {
-      users = prds.data;
+      users.addAll(prds.data);
+//      users = prds.data;
     });
   }
 
